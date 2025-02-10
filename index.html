@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkpoint Visualization</title>
-    <link rel = 'stylesheet' href = 'style.css'
+    <link rel = 'stylesheet' href = 'style.css' />
+    <script src = 'd3vis.js' type = module></script>
 </head>
 <body>
     <h1>DSC 106 Project 3 Checkpoint Visualization</h1>
+    <div id="controls">
+        <label for="population-slider">Minimum Population:</label>
+        <input type="range" id="population-slider" min="0" max="10000000" step="50000" value="0">
+        <span id="population-value">0</span>
+      </div>
+    <div class = 'container'>
+        <svg id="bubble-chart" >
+        </svg>
+     </div>
 </body>
 </html>
