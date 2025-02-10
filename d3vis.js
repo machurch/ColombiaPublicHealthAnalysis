@@ -51,7 +51,6 @@ let svg = d3.select('svg');
 function drawBubbleChart(data) {
     const width = 600, height = 400;
 
-    // Select the div and create an SVG inside it
     const svg = d3.select("#bubble-chart")
         .html("") // Clear any existing chart
         .append("svg")
@@ -62,19 +61,16 @@ function drawBubbleChart(data) {
         .style("display", "block")
         .style("margin", "auto");
 
-    // Create a scale for bubble sizes
     const radiusScale = d3.scaleSqrt()
         .domain([0, d3.max(data, d => d.value)])
         .range([5, 30]);
 
-    // Create a force simulation
     const simulation = d3.forceSimulation(data)
         .force("x", d3.forceX(width / 2).strength(0.05))
         .force("y", d3.forceY(height / 2).strength(0.05))
         .force("collide", d3.forceCollide(d => radiusScale(d.value) + 2))
         .on("tick", ticked);
 
-    // Create bubbles
     const bubbles = svg.selectAll(".bubble")
         .data(data)
         .enter().append("circle")
@@ -82,32 +78,52 @@ function drawBubbleChart(data) {
         .attr("r", d => radiusScale(d.value))
         .attr("fill", (d, i) => d3.schemeCategory10[i % 10]);
 
-    // Add labels
-    const labels = svg.selectAll(".label")
+    // Group for labels and backgrounds
+    const labelGroups = svg.selectAll(".label-group")
         .data(data)
-        .enter().append("text")
-        .attr("class", "label")
-        .text(d => `${d.name}: ${d.value.toLocaleString()}`)
-        .attr("font-size", "12px")
-        .attr("dy", ".35em")
-        .attr("visibility", "hidden");
+        .enter().append("g")
+        .attr("class", "label-group")
+        .attr("visibility", "hidden"); // Initially hidden
 
-    bubbles.on("mouseover", function(event, d) {
-        d3.select(this).style("opacity", 0.7); // Optional: dim bubble on hover
-        // Show label tied to this bubble
-        d3.select(labels.nodes()[data.indexOf(d)]).attr("visibility", "visible");
-    }).on("mouseout", function(event, d) {
-        d3.select(this).style("opacity", 1); // Reset bubble opacity
-        // Hide label tied to this bubble
-        d3.select(labels.nodes()[data.indexOf(d)]).attr("visibility", "hidden");
+    // Append text labels first
+    const labels = labelGroups.append("text")
+        .text(d => `${d.name} Total Dengue Cases: ${d.value.toLocaleString()}`)
+        .attr("font-size", "12px")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".35em");
+
+    // Append background rectangles AFTER text so we can calculate text size
+    const labelBackgrounds = labelGroups.insert("rect", "text") // Insert rect *before* text
+        .attr("fill", "white")
+        .attr("stroke", "black")
+        .attr("rx", 5)  // Rounded corners
+        .attr("ry", 5);
+
+    // Adjust background size based on text
+    labels.each(function(d, i) {
+        const bbox = this.getBBox();  // Get text size
+        d3.select(labelBackgrounds.nodes()[i])
+            .attr("x", bbox.x - 5)
+            .attr("y", bbox.y - 2)
+            .attr("width", bbox.width + 10)
+            .attr("height", bbox.height + 4);
     });
 
-    // Update positions on each tick
+    // Show/Hide on hover
+    bubbles.on("mouseover", function(event, d) {
+        d3.select(this).style("opacity", 0.7);
+        d3.select(labelGroups.nodes()[data.indexOf(d)]).attr("visibility", "visible");
+    }).on("mouseout", function(event, d) {
+        d3.select(this).style("opacity", 1);
+        d3.select(labelGroups.nodes()[data.indexOf(d)]).attr("visibility", "hidden");
+    });
+
     function ticked() {
-    bubbles.attr("cx", d => d.x).attr("cy", d => d.y);
-    labels.attr("x", d => d.x).attr("y", d => d.y);
+        bubbles.attr("cx", d => d.x).attr("cy", d => d.y);
+        labelGroups.attr("transform", d => `translate(${d.x},${d.y})`);
     }
-    }
+}
+
 
 function filterByPopulation(minPopulation) {
     const filteredData = data.filter(d => d.population >= minPopulation);
