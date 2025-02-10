@@ -31,6 +31,8 @@ fetch("caseData.csv")
         console.error("Missing required columns in CSV");
         return;
       }
+
+    console.log("Raw Row Example:", rows[1]);
   
     // ✅ Assign data to global variable
     data = rows.slice(1).map(row => ({
@@ -38,7 +40,7 @@ fetch("caseData.csv")
     value: parseInt(row[totalCasesIndex]) || 0,
     population: parseInt(row[populationIndex]) || 0
     }));
-    console.log(data)
+    // console.log(data)
     drawBubbleChart(data);    
   });
 
@@ -63,7 +65,7 @@ function drawBubbleChart(data) {
     // Create a scale for bubble sizes
     const radiusScale = d3.scaleSqrt()
         .domain([0, d3.max(data, d => d.value)])
-        .range([5, 40]);
+        .range([5, 30]);
 
     // Create a force simulation
     const simulation = d3.forceSimulation(data)
@@ -87,7 +89,18 @@ function drawBubbleChart(data) {
         .attr("class", "label")
         .text(d => `${d.name}: ${d.value.toLocaleString()}`)
         .attr("font-size", "12px")
-        .attr("dy", ".35em");
+        .attr("dy", ".35em")
+        .attr("visibility", "hidden");
+
+    bubbles.on("mouseover", function(event, d) {
+        d3.select(this).style("opacity", 0.7); // Optional: dim bubble on hover
+        // Show label tied to this bubble
+        d3.select(labels.nodes()[data.indexOf(d)]).attr("visibility", "visible");
+    }).on("mouseout", function(event, d) {
+        d3.select(this).style("opacity", 1); // Reset bubble opacity
+        // Hide label tied to this bubble
+        d3.select(labels.nodes()[data.indexOf(d)]).attr("visibility", "hidden");
+    });
 
     // Update positions on each tick
     function ticked() {

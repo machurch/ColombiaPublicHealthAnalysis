@@ -11,7 +11,7 @@ body {
 
   #bubble-chart {
     width: 100%;
-    max-width: 10000px; /* Limits size for better layout */
+    max-width: 1000px; /* Limits size for better layout */
     height: 900px;
     margin: 0 auto;
     display: flex;
