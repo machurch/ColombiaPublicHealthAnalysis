@@ -87,10 +87,20 @@ function drawBubbleChart(data) {
 
     // Append text labels first
     const labels = labelGroups.append("text")
-        .text(d => `${d.name} Total Dengue Cases: ${d.value.toLocaleString()}`)
         .attr("font-size", "12px")
         .attr("text-anchor", "middle")
-        .attr("dy", ".35em");
+        .attr("dy", "-0.5em") // Adjust vertical alignment for better positioning
+
+    labels.append("tspan") // Bold municipality name on the first line
+        .text(d => d.name)
+        .attr("font-weight", "bold")
+        .attr("x", 0) // Keep text centered
+
+    labels.append("tspan") // Non-bold total cases on the second line
+        .text(d => `Total Dengue Cases: ${d.value.toLocaleString()}`)
+        .attr("x", 0) // Align with the first line
+        .attr("dy", "1.2em") // Move below the first line
+        .attr("font-weight", "normal");
 
     // Append background rectangles AFTER text so we can calculate text size
     const labelBackgrounds = labelGroups.insert("rect", "text") // Insert rect *before* text
