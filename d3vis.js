@@ -45,9 +45,6 @@ fetch("caseData.csv")
   });
 
 
-let svg = d3.select('svg');
-
-
 function drawBubbleChart(data) {
     const width = 600, height = 400;
 
@@ -63,7 +60,7 @@ function drawBubbleChart(data) {
 
     const radiusScale = d3.scaleSqrt()
         .domain([0, d3.max(data, d => d.value)])
-        .range([5, 30]);
+        .range([3, 20]);
 
     const simulation = d3.forceSimulation(data)
         .force("x", d3.forceX(width / 2).strength(0.05))
